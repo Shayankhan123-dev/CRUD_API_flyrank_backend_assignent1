@@ -101,34 +101,24 @@ content-type: application/json
 ---
 
 ## Swagger UI
-```
-![Swagger UI](images/swagger1.png)
-```
-```
-![Hello API](images/swagger2.png)
-```
-```
-![Description API ](images/swagger3.png)
-```
-```
-![Health check API](images/swagger4.png)
-```
-```
-![Get All Tasks API](images/swagger5.png)
-```
-```
-![Get a single task through id API](images/swagger8.png)
-```
-```
-![Add a new task API](images/swagger7.png)
-```
-```
-![Update a task API through id](images/swagger9.png)
-```
 
-```
+![Swagger UI](images/swagger1.png)
+
+![Hello API](images/swagger2.png)
+
+![Description API ](images/swagger3.png)
+
+![Health check API](images/swagger4.png)
+
+![Get All Tasks API](images/swagger5.png)
+
+![Get a single task through id API](images/swagger8.png)
+
+![Add a new task API](images/swagger7.png)
+
+![Update a task API through id](images/swagger9.png)
+
 ![Delete a task](images/swagger20.png)
-```
 
 ---
 
