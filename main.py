@@ -22,3 +22,16 @@ def get_describe():
 def get_health():
     return {"status": "OK"}
 
+
+#get method for the complete tasks list
+@app.get("/tasks")
+def tasks_list():
+    return tasks
+
+#Get method for a single task inside the tasks list using the id provided through the browser url
+@app.get("/tasks/{task_id}")
+def get_task_id(task_id):
+    for i in tasks:
+        if int(task_id) == i["id"]:
+            return i
+    return "Not found 404"
