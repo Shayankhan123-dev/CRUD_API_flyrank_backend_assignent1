@@ -12,6 +12,11 @@ tasks = [{"id":1, "Title": "Learn FASTapi in detail", "Completed": True}
 class TaskCreate(BaseModel):
     title: str
 
+#Class for updating tasks
+class TaskUpdate(BaseModel):
+    title : str
+    Completed : bool
+
 @app.get("/")
 def hello():
     return {"message": "Hello, World!"}
@@ -48,4 +53,28 @@ def post_task(task: TaskCreate):
         new_task = {"id": len(tasks)+1, "Title": task.title, "Completed": False}
         tasks.append(new_task)
         return new_task
+
+
+#updating task endpoint
+@app.put("/tasks/{task_id}")
+def put_tasks(task_id, task: TaskUpdate):
+    if task.title.strip() == "":
+        raise HTTPException(status_code = 400, detail = "Empty/invalid body")
+    else:
+        for i in tasks:
+            if int(task_id) == i["id"]:
+                i["Title"] = task.title
+                i["Completed"] = task.Completed
+                return i
+    return "Unknown id 404"
+
+
+# deleting task endpoint
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id):
+    for i in tasks:
+        if int(task_id) == i["id"]:
+            tasks.remove(i)
+            return {"status": 204}
+        return "Unknown id"
 
