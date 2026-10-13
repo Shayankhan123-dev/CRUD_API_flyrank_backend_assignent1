@@ -1,5 +1,5 @@
 import sqlite3
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 
 #Database initialization function
@@ -127,24 +127,55 @@ def post_task(task: TaskCreate):
 
 #updating task endpoint
 @app.put("/tasks/{task_id}", description = "updates a specific task through the id")
-def put_tasks(task_id, task: TaskUpdate):
-    if task.title.strip() == "":
-        raise HTTPException(status_code = 400, detail = "Empty/invalid body")
-    else:
-        for i in tasks:
-            if int(task_id) == i["id"]:
-                i["Title"] = task.title
-                i["Completed"] = task.Completed
-                return i
-    return "Unknown id 404"
+def put_tasks(task_id: int, task: TaskUpdate):
+    if not task.title or task.title.strip() == "":
+        raise HTTPException(status_code=400, detail="Empty/invalid body")
+        
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # Check if the task exists
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing_task = cursor.fetchone()
+    
+    if existing_task is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Unknown id 404")
+        
+    # Update the task
+    cursor.execute(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+        (task.title, task.Completed, task_id)
+    )
+    conn.commit()
+    
+    # Fetch the updated task to return it
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    updated_task = cursor.fetchone()
+    conn.close()
+    
+    return dict(updated_task)
 
 
 # deleting task endpoint
-@app.delete("/tasks/{task_id}", description = "Deletes a task through the id")
-def delete_task(task_id):
-    for i in tasks:
-        if int(task_id) == i["id"]:
-            tasks.remove(i)
-            return {"status": 204}
-        return "Unknown id"
+@app.delete("/tasks/{task_id}", description="Deletes a task through the id", status_code=204)
+def delete_task(task_id: int):
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    
+    # Check if the task exists
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    existing_task = cursor.fetchone()
+    
+    if existing_task is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Unknown id")
+        
+    # Delete the task
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    conn.close()
+    
+    return Response(status_code=204)
 
