@@ -37,10 +37,10 @@ initialize_database()
 
 app = FastAPI(description = "A simple CRUD API built for flyrank internship assignment using FastAPI by Shayan Khan(shayandev123@gmail.com)")
 #The tasks list
-tasks = [{"id":1, "Title": "Learn FASTapi in detail", "Completed": True}
-         ,{"id":2, "Title": "Complete the clients project", "Completed": False}
-         ,{"id":3, "Title": "Sleep on time", "Completed": False}
-         ,]
+# tasks = [{"id":1, "Title": "Learn FASTapi in detail", "Completed": True}
+#          ,{"id":2, "Title": "Complete the clients project", "Completed": False}
+#          ,{"id":3, "Title": "Sleep on time", "Completed": False}
+#          ,]
 
 #Class for posting tasks
 class TaskCreate(BaseModel):
@@ -68,15 +68,32 @@ def get_health():
 #get method for the complete tasks list
 @app.get("/tasks",description = "returns the list of tasks")
 def tasks_list():
+    conn = sqlite3.connect("tasks.db")
+    # row_factory formats the SQLite output into dictionaries automatically
+    conn.row_factory = sqlite3.Row 
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM tasks")
+    tasks = cursor.fetchall()
+    conn.close()
+    
     return tasks
 
 #Get method for a single task inside the tasks list using the id provided through the browser url
 @app.get("/tasks/{task_id}",description = "returns the specific task through the id in the tasks list")
 def get_task_id(task_id):
-    for i in tasks:
-        if int(task_id) == i["id"]:
-            return i
-    return "Not found 404"
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    task = cursor.fetchone()
+    conn.close()
+    
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+        
+    return dict(task)
     
 #posting task endpoint
 @app.post("/tasks",description = "Adds a new task in the tasks list")
