@@ -2,6 +2,8 @@
 
 A simple CRUD (Create, Read, Update, Delete) REST API built with FastAPI for the FlyRank Backend Assignment.
 
+*Update: This API has been upgraded from an in-memory array to a persistent SQLite database.*
+
 ## Features
 
 - Create a task
@@ -10,95 +12,21 @@ A simple CRUD (Create, Read, Update, Delete) REST API built with FastAPI for the
 - Update a task
 - Delete a task
 - Interactive Swagger documentation
+- **Data persistence with SQLite** (Data survives server restarts)
 
 ---
 
-## Installation
+## Database Architecture (Week 3 - Part 2)
 
-Clone the repository
+- **Why SQLite?** SQLite was chosen because it is lightweight, requires no external server setup, and stores the entire database in a single local file. This makes it perfect for a beginner CRUD API while still teaching standard SQL syntax.
+- **Storage Location:** The database is stored locally in a file named `tasks.db` in the root directory of the project.
+- **Initialization:** The database and its tables are automatically created the first time the application runs. If the table is empty, it automatically seeds 3 example tasks.
 
-```bash
-git clone https://github.com/Shayankhan123-dev/CRUD_API_flyrank_backend_assignent1.git
-cd CRUD_API_flyrank_backend_assignent1
-```
+### Database Viewer
 
-Create a virtual environment
+Here is a look at the data directly inside DB Browser for SQLite:
 
-```bash
-python -m venv venv
-```
-
-Activate it
-
-Linux/macOS
-
-```bash
-source venv/bin/activate
-```
-
-Windows
-
-```bash
-venv\Scripts\activate
-```
-
-Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-Run the server
-
-```bash
-uvicorn main:app --reload
-```
-
----
-
-## Swagger Documentation
-
-Open
-
-```
-http://127.0.0.1:8000/docs
-```
-
----
-
-## Endpoints
-
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | / | Hello World |
-| GET | /describe | API description |
-| GET | /health | Health check |
-| GET | /tasks | Get all tasks |
-| GET | /tasks/{task_id} | Get a task by ID |
-| POST | /tasks | Create a task |
-| PUT | /tasks/{task_id} | Update a task |
-| DELETE | /tasks/{task_id} | Delete a task |
-
----
-
-## curl (Note that the response pasted here is the actual response when this curl command was used)
-
-```bash
-curl -i http://127.0.0.1:8000/tasks
-```
-
-Response
-
-```HTTP/1.1 200 OK
-date: Tue, 21 Jul 2026 10:49:59 GMT
-server: uvicorn
-content-length: 178
-content-type: application/json
-
-[{"id":1,"Title":"Learn FASTapi in detail","Completed":true},{"id":2,"Title":"Complete the clients project","Completed":false},{"id":3,"Title":"Sleep on time","Completed":false}]
-```
-
----
+![Database Screenshot](images/db_1.png)(images/db_2.png)(images/db_3.png)(images/db_4.png)(images/db_5.png)
 
 ## Swagger UI
 
@@ -119,12 +47,3 @@ content-type: application/json
 ![Update a task API through id](images/swagger9.png)
 
 ![Delete a task](images/swagger20.png)
-
----
-
-## Technologies Used
-
-- Python
-- FastAPI
-- Uvicorn
-- Pydantic
