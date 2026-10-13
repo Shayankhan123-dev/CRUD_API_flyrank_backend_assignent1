@@ -96,14 +96,33 @@ def get_task_id(task_id):
     return dict(task)
     
 #posting task endpoint
-@app.post("/tasks",description = "Adds a new task in the tasks list")
+@app.post("/tasks",description = "Adds a new task in the tasks list", status_code = 201)
 def post_task(task: TaskCreate):
-    if task.title.strip() == "":
+    # Validation remains exactly the same
+    if not task.title or task.title.strip() == "":
         raise HTTPException(status_code=400, detail="Title cannot be empty")
-    else:
-        new_task = {"id": len(tasks)+1, "Title": task.title, "Completed": False}
-        tasks.append(new_task)
-        return new_task
+        
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    # Insert the new task. We default 'done' to False (0 in SQLite)
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)", 
+        (task.title, False)
+    )
+    conn.commit()
+    
+    # Retrieve the auto-generated ID for the new row
+    new_task_id = cursor.lastrowid
+    
+    # Fetch the newly created task from the database to return it
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_task_id,))
+    new_task = cursor.fetchone()
+    
+    conn.close()
+    
+    return dict(new_task)
 
 
 #updating task endpoint
