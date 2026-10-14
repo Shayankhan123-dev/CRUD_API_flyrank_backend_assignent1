@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Maps your local code to the container so live-reload works
+      - .:/app
+      # Creates a persistent named volume specifically for the database
+      - sqlite_data:/app/data
+
+volumes:
+  sqlite_data:

@@ -1,8 +1,8 @@
-# Task API - FastAPI CRUD
+# Task API - FastAPI CRUD (Dockerized)
 
 A simple CRUD (Create, Read, Update, Delete) REST API built with FastAPI for the FlyRank Backend Assignment.
 
-*Update: This API has been upgraded from an in-memory array to a persistent SQLite database.*
+*Update: This project has now been fully containerized using Docker (Podman) and uses a persistent SQLite database mounted via Docker volumes.*
 
 ## Features
 
@@ -12,38 +12,30 @@ A simple CRUD (Create, Read, Update, Delete) REST API built with FastAPI for the
 - Update a task
 - Delete a task
 - Interactive Swagger documentation
-- **Data persistence with SQLite** (Data survives server restarts)
+- **Docker Containerization** (App and database environment run in isolated containers)
+- **Data Persistence** (Data survives server and container restarts via Docker volumes)
 
 ---
 
-## Database Architecture (Week 3 - Part 2)
+## Proving the Architecture
 
-- **Why SQLite?** SQLite was chosen because it is lightweight, requires no external server setup, and stores the entire database in a single local file. This makes it perfect for a beginner CRUD API while still teaching standard SQL syntax.
-- **Storage Location:** The database is stored locally in a file named `tasks.db` in the root directory of the project.
-- **Initialization:** The database and its tables are automatically created the first time the application runs. If the table is empty, it automatically seeds 3 example tasks.
+A major goal of this assignment was to swap the storage layer and deployment method without breaking the API. 
+**The service and routes remained 100% unchanged.** The clients sending `GET`, `POST`, `PUT`, and `DELETE` requests experience the exact same behavior, proving the value of decoupling the API layer from the storage/infrastructure layer.
 
-### Database Viewer
+### How Persistence was Proven
+Data persistence was verified across container restarts using the following steps:
+1. Sent a `POST /tasks` request to create a task named "Docker persistence test".
+2. Ran `docker compose down` to completely destroy the running containers.
+3. Ran `docker compose up -d` to spin up fresh containers.
+4. Sent a `GET /tasks` request and verified that "Docker persistence test" was still present, proving the `sqlite_data` Docker volume successfully protected the database file.
 
-Here is a look at the data directly inside DB Browser for SQLite:
+---
 
-![Database Screenshot](images/db_1.png)(images/db_2.png)(images/db_3.png)(images/db_4.png)(images/db_5.png)
+## Getting Started (Docker / Podman)
 
-## Swagger UI
+The easiest way to run this project is using Docker Compose.
 
-![Swagger UI](images/swagger1.png)
-
-![Hello API](images/swagger2.png)
-
-![Description API ](images/swagger3.png)
-
-![Health check API](images/swagger4.png)
-
-![Get All Tasks API](images/swagger5.png)
-
-![Get a single task through id API](images/swagger8.png)
-
-![Add a new task API](images/swagger7.png)
-
-![Update a task API through id](images/swagger9.png)
-
-![Delete a task](images/swagger20.png)
+**1. Clone the repository**
+```bash
+git clone [https://github.com/Shayankhan123-dev/CRUD_API_flyrank_backend_assignent1.git](https://github.com/Shayankhan123-dev/CRUD_API_flyrank_backend_assignent1.git)
+cd CRUD_API_flyrank_backend_assignent1

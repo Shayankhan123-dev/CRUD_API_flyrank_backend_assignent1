@@ -1,10 +1,24 @@
 import sqlite3
-from fastapi import FastAPI, HTTPException, Response
+import os
+from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, status, Response
 from pydantic import BaseModel
+
+# Load variables from the .env file
+load_dotenv()
+
+# Get the database path from .env, fallback to "tasks.db" if missing
+DB_FILE = os.getenv("DATABASE_FILE", "tasks.db")
 
 #Database initialization function
 def initialize_database():
-    conn = sqlite3.connect("tasks.db")
+    # Ensure the directory for the database exists (crucial for Docker volumes)
+    db_dir = os.path.dirname(DB_FILE)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -59,6 +73,7 @@ def hello():
 @app.get("/describe",description = "returns a simple description of this project and the endpoints")
 def get_describe():
     return { "name": "Task API", "version": "1.0", "endpoints": ["/tasks"] }
+    
 #health check
 @app.get("/health",description = "Returns a status whether or not the server is running")
 def get_health():
@@ -68,7 +83,7 @@ def get_health():
 #get method for the complete tasks list
 @app.get("/tasks",description = "returns the list of tasks")
 def tasks_list():
-    conn = sqlite3.connect("tasks.db")
+    conn = sqlite3.connect(DB_FILE)
     # row_factory formats the SQLite output into dictionaries automatically
     conn.row_factory = sqlite3.Row 
     cursor = conn.cursor()
@@ -82,7 +97,7 @@ def tasks_list():
 #Get method for a single task inside the tasks list using the id provided through the browser url
 @app.get("/tasks/{task_id}",description = "returns the specific task through the id in the tasks list")
 def get_task_id(task_id):
-    conn = sqlite3.connect("tasks.db")
+    conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -102,7 +117,7 @@ def post_task(task: TaskCreate):
     if not task.title or task.title.strip() == "":
         raise HTTPException(status_code=400, detail="Title cannot be empty")
         
-    conn = sqlite3.connect("tasks.db")
+    conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -131,7 +146,7 @@ def put_tasks(task_id: int, task: TaskUpdate):
     if not task.title or task.title.strip() == "":
         raise HTTPException(status_code=400, detail="Empty/invalid body")
         
-    conn = sqlite3.connect("tasks.db")
+    conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -161,7 +176,7 @@ def put_tasks(task_id: int, task: TaskUpdate):
 # deleting task endpoint
 @app.delete("/tasks/{task_id}", description="Deletes a task through the id", status_code=204)
 def delete_task(task_id: int):
-    conn = sqlite3.connect("tasks.db")
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
     # Check if the task exists
